@@ -1,0 +1,57 @@
+# This are the Nginx server blocks that proxies to Express' ports based on domain
+# Make sure to create the SSL certificate using cert-bot, then edit the nginx file
+
+# musego.app
+server {
+  listen 80;
+  server_name musego.app www.musego.app;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name musego.app www.musego.app;
+  ssl_certificate /etc/letsencrypt/live/musego.app/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/musego.app/privkey.pem;
+
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers 'generated-by-certbot';
+  location /  {
+    proxy_pass    http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+}
+
+# williamdev.co
+server {
+  listen 80;
+  server_name williamdev.co www.williamdev.co;
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name williamdev.co www.williamdev.co;
+  ssl_certificate /etc/letsencrypt/live/williamdev.co/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/williamdev.co/privkey.pem;
+
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_prefer_server_ciphers on;
+  ssl_ciphers 'generated-by-certbot';
+  location /  {
+    proxy_pass    http://localhost:3001;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+}
+
+# You will need to point your domain DNS to your virtual machine IP
+# Then Nginx will determine which port to use based on domain name
